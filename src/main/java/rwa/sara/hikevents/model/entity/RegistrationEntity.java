@@ -49,11 +49,15 @@ public class RegistrationEntity {
 	public RegistrationEntity() {
 	}
 
-	public RegistrationEntity(int id, UserEntity user, EventEntity event) {
-		super();
+	public RegistrationEntity(int id, EventEntity event, UserEntity user) {
 		this.id = id;
-		this.user = user;
 		this.event = event;
+		this.user = user;
+	}
+
+	public RegistrationEntity(EventEntity event, UserEntity user) {
+		this.event = event;
+		this.user = user;
 	}
 
 	public void setId(int id) {

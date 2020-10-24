@@ -5,8 +5,6 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import rwa.sara.hikevents.exception.ResourceNotFoundException;
-
 @Service
 public interface IService<T> {
 

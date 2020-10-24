@@ -6,10 +6,10 @@ import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import rwa.sara.hikevents.model.entity.EventEntity;
 import rwa.sara.hikevents.model.entity.RegistrationEntity;
 import rwa.sara.hikevents.model.entity.UserEntity;
 import rwa.sara.hikevents.repository.RegistrationRepository;
-import rwa.sara.hikevents.security.service.LoggedInUser;
 import rwa.sara.hikevents.service.IService;
 
 @Service
@@ -31,10 +31,11 @@ public class RegistrationService implements IService<RegistrationEntity>{
 		return registrationRepository.findByEventId(eventId);
 	}
 	
-	public Optional<RegistrationEntity> insert(RegistrationEntity registrationEntity, LoggedInUser loggedInUser) {
+	public Optional<RegistrationEntity> insert(EventEntity eventEntity, UserEntity userEntity) {
 		try{
-			registrationEntity.setUser(modelMapper.map(loggedInUser, UserEntity.class));
-			return Optional.of(this.registrationRepository.save(registrationEntity));
+			//registrationEntity.setUser(modelMapper.map(loggedInUser, UserEntity.class));
+			RegistrationEntity registrationEntity = new RegistrationEntity(eventEntity, userEntity);
+			return Optional.of(registrationRepository.save(registrationEntity));
 		} catch (NullPointerException e) {
 			return Optional.empty();
 		}

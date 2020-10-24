@@ -49,7 +49,7 @@ public class EventService implements IService<EventEntity>{
 	}
 	
 	public Optional<EventEntity> insert(EventEntity eventEntity)  {
-		if(!eventRepository.findByTitle(eventEntity.getTitle()).isPresent()) {
+		if(eventRepository.findByTitle(eventEntity.getTitle()).isPresent()) {
 			return Optional.empty();
 		} else {
 			return Optional.of(eventRepository.save(eventEntity));

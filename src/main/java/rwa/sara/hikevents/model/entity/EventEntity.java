@@ -3,10 +3,8 @@ package rwa.sara.hikevents.model.entity;
 import java.time.LocalDate;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -63,7 +61,7 @@ public class EventEntity {
 	@ApiModelProperty(notes = "Participation price for the event.")
 	private int price;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne/*(fetch = FetchType.LAZY, cascade = CascadeType.ALL)*/
 	@JoinColumn(name = "host")
 	@JsonIgnore
 	@ApiModelProperty(notes = "Host of the event.")
