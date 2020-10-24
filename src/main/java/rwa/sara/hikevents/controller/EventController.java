@@ -25,7 +25,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import rwa.sara.hikevents.exception.DuplicateResourceException;
 import rwa.sara.hikevents.exception.ResourceNotFoundException;
 import rwa.sara.hikevents.model.EventsSearchOptions;
 import rwa.sara.hikevents.model.api.EventDTO;
@@ -58,7 +57,8 @@ public class EventController {
 	@PostMapping
 	//only hiking clubs can create new events
 	@PreAuthorize("hasRole('HIKINGCLUB')")
-	public HttpEntity<EventEntity> create(@RequestBody EventDTO eventDto) throws DuplicateResourceException{
+	public HttpEntity<EventEntity> create(@RequestBody EventDTO eventDto, @AuthenticationPrincipal LoggedInUser loggedInUser) {
+		eventDto.setHost(modelMapper.map(loggedInUser, UserEntity.class));
 		Optional<EventEntity> eventOptional = eventService.insert(modelMapper.map(eventDto, EventEntity.class));
 		if(eventOptional.isPresent()) {
 			return ResponseEntity.ok(eventOptional.get());
@@ -91,7 +91,7 @@ public class EventController {
 			@ApiResponse(code = 404, message = "Not found - no event with that id found."),
 	})
 	@GetMapping("/{id}")
-	public HttpEntity<EventEntity> get(@PathVariable("id") int eventId) throws ResourceNotFoundException{
+	public HttpEntity<EventEntity> get(@PathVariable("id") int eventId) {
 		Optional<EventEntity> eventOptional = eventService.get(eventId);
 		if(eventOptional.isPresent()) {
 			return ResponseEntity.ok(eventOptional.get());

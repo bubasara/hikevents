@@ -6,9 +6,6 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import rwa.sara.hikevents.exception.DuplicateResourceException;
-import rwa.sara.hikevents.exception.ResourceNotFoundException;
-import rwa.sara.hikevents.exception.ResourceType;
 import rwa.sara.hikevents.model.EventsSearchOptions;
 import rwa.sara.hikevents.model.entity.EventEntity;
 import rwa.sara.hikevents.model.entity.UserEntity;
@@ -51,9 +48,9 @@ public class EventService implements IService<EventEntity>{
 		return eventRepository.findByPriceLessThan(price);
 	}
 	
-	public Optional<EventEntity> insert(EventEntity eventEntity) throws DuplicateResourceException {
+	public Optional<EventEntity> insert(EventEntity eventEntity)  {
 		if(!eventRepository.findByTitle(eventEntity.getTitle()).isPresent()) {
-			throw new DuplicateResourceException(ResourceType.EVENT, "Event with title: " + eventEntity.getTitle() + " already exists.");
+			return Optional.empty();
 		} else {
 			return Optional.of(eventRepository.save(eventEntity));
 		}
@@ -65,22 +62,23 @@ public class EventService implements IService<EventEntity>{
 	}
 
 	@Override
-	public Optional<EventEntity> get(int id) throws ResourceNotFoundException {
-		return Optional.of(eventRepository.findById(id).orElseThrow(
-				() -> new ResourceNotFoundException(ResourceType.EVENT, "Event with id: " + id + " not found.")));
+	public Optional<EventEntity> get(int id) {
+		return eventRepository.findById(id);
 	}
 
 	@Override
-	public Optional<EventEntity> update(EventEntity eventEntity) throws ResourceNotFoundException {
-		Optional.of(eventRepository.findById(eventEntity.getId()).orElseThrow(
-				() -> new ResourceNotFoundException(ResourceType.EVENT, "Event with id: " + eventEntity.getId() + " not found.")));
-		return Optional.of(eventRepository.save(eventEntity));
+	public Optional<EventEntity> update(EventEntity eventEntity) {
+		if(eventRepository.findById(eventEntity.getId()).isPresent()){
+			return Optional.of(eventRepository.save(eventEntity));
+		} else {
+			return Optional.empty();
+		}
 	}
 
 	@Override
-	public boolean delete(int id) throws ResourceNotFoundException {
+	public boolean delete(int id) {
 		if(!eventRepository.existsById(id)) {
-			throw new ResourceNotFoundException(ResourceType.EVENT, "Event with id: " + id + " not found.");
+			return false;
 		} else {
 			eventRepository.deleteById(id);
 			return true;

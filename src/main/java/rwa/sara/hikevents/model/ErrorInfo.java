@@ -5,10 +5,14 @@ import lombok.Value;
 @Value
 public class ErrorInfo {
 
+	public ErrorInfo(ErrorCode userNotFound, String message) {
+		this.errorCode = userNotFound;
+		this.message = message;
+	}
 	public enum ErrorCode {
-		USER_NOT_FOUND,
-		DATABASE_ERROR,
-		GENERAL_ERROR
+		RESOURCE_NOT_FOUND,
+		DUPLICATE_RESOURCE_FOUND,
+		EMAIL_NOT_FOUND
 	};
 	
 	ErrorCode errorCode;

@@ -45,6 +45,24 @@ public class RegistrationEntity {
 	@JsonIgnore
 	@ApiModelProperty(notes = "Event which hiker registered for.")
 	EventEntity event;
+	
+	public RegistrationEntity() {
+	}
+
+	public RegistrationEntity(int id, UserEntity user, EventEntity event) {
+		super();
+		this.id = id;
+		this.user = user;
+		this.event = event;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public void setEvent(EventEntity event) {
+		this.event = event;
+	}
 
 	public void setUser(UserEntity userEntity) {
 		this.user = userEntity;		

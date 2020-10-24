@@ -11,8 +11,8 @@ import rwa.sara.hikevents.exception.ResourceNotFoundException;
 public interface IService<T> {
 
 	public List<T> getAll();
-	public Optional<T> get(int id) throws ResourceNotFoundException;
-	public Optional<T> update(T obj) throws ResourceNotFoundException;
-	public boolean delete(int id) throws ResourceNotFoundException;
+	public Optional<T> get(int id);
+	public Optional<T> update(T obj);
+	public boolean delete(int id);
 	
 }

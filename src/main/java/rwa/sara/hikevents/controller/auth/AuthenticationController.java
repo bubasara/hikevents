@@ -23,7 +23,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import rwa.sara.hikevents.exception.DuplicateResourceException;
 import rwa.sara.hikevents.model.LoginCredentials;
 import rwa.sara.hikevents.model.api.UserGetDTO;
 import rwa.sara.hikevents.model.api.UserPostDTO;
@@ -103,7 +102,7 @@ public class AuthenticationController {
 			@ApiResponse(code = 404, message = "Not found"),
 	})
 	@PostMapping("/signup")
-	public ResponseEntity<UserGetDTO> registerUser(@Valid @RequestBody UserPostDTO user) throws DuplicateResourceException {
+	public ResponseEntity<UserGetDTO> registerUser(@Valid @RequestBody UserPostDTO user) {
 		UserEntity newUser = modelMapper.map(user, UserEntity.class);
 		newUser.setPassword(encoder.encode(user.getPassword()));
 		Optional<UserEntity> userInserted = userService.insert(newUser);
