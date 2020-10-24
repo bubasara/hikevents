@@ -1,5 +1,6 @@
 package rwa.sara.hikevents.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,9 +26,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import rwa.sara.hikevents.exception.ResourceNotFoundException;
 import rwa.sara.hikevents.model.EventsSearchOptions;
-import rwa.sara.hikevents.model.api.EventDTO;
+import rwa.sara.hikevents.model.api.EventGetDTO;
+import rwa.sara.hikevents.model.api.EventPostDTO;
 import rwa.sara.hikevents.model.entity.EventEntity;
 import rwa.sara.hikevents.model.entity.UserEntity;
 import rwa.sara.hikevents.security.service.LoggedInUser;
@@ -57,11 +58,14 @@ public class EventController {
 	@PostMapping
 	//only hiking clubs can create new events
 	@PreAuthorize("hasRole('HIKINGCLUB')")
-	public HttpEntity<EventEntity> create(@RequestBody EventDTO eventDto, @AuthenticationPrincipal LoggedInUser loggedInUser) {
-		eventDto.setHost(modelMapper.map(loggedInUser, UserEntity.class));
-		Optional<EventEntity> eventOptional = eventService.insert(modelMapper.map(eventDto, EventEntity.class));
+	public HttpEntity<EventGetDTO> create(@RequestBody EventPostDTO eventDto,
+											@AuthenticationPrincipal LoggedInUser loggedInUser) {
+		//eventDto.setHost(modelMapper.map(loggedInUser, UserEntity.class));
+		EventEntity event = modelMapper.map(eventDto, EventEntity.class);
+		event.setHost(modelMapper.map(loggedInUser, UserEntity.class));
+		Optional<EventEntity> eventOptional = eventService.insert(event);
 		if(eventOptional.isPresent()) {
-			return ResponseEntity.ok(eventOptional.get());
+			return ResponseEntity.ok(modelMapper.map(eventOptional.get(), EventGetDTO.class));
 		} else {
 			return ResponseEntity.status(HttpStatus.CONFLICT).build();
 		}
@@ -75,9 +79,13 @@ public class EventController {
 			@ApiResponse(code = 404, message = "Not found - no events found."),
 	})
 	@GetMapping
-	public HttpEntity<List<EventEntity>> getAll() throws ResponseStatusException {
+	public HttpEntity<List<EventGetDTO>> getAll() throws ResponseStatusException {
 		try {
-			return ResponseEntity.ok(eventService.getAll());
+			List<EventGetDTO> eventsGetDTO = new ArrayList<>();
+			for (EventEntity event : eventService.getAll()) {
+				eventsGetDTO.add(modelMapper.map(event, EventGetDTO.class));
+			}
+			return ResponseEntity.ok(eventsGetDTO);
 		} catch (ResponseStatusException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No events found.", e);
 		}
@@ -93,7 +101,7 @@ public class EventController {
 	@GetMapping("/{id}")
 	public HttpEntity<EventEntity> get(@PathVariable("id") int eventId) {
 		Optional<EventEntity> eventOptional = eventService.get(eventId);
-		if(eventOptional.isPresent()) {
+		if (eventOptional.isPresent()) {
 			return ResponseEntity.ok(eventOptional.get());
 		} else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -127,21 +135,17 @@ public class EventController {
 	@DeleteMapping("/{id}")
 	//only hiking clubs can delete their own events
 	@PreAuthorize("hasRole('HIKINGCLUB')")
-	public HttpEntity<Object> delete(@PathVariable("id") int eventId, @AuthenticationPrincipal LoggedInUser loggedInUser) throws ResourceNotFoundException{
-		if(!eventService.get(eventId).isPresent()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
-		else {
-			EventEntity currentEvent = eventService.get(eventId).get();
-			if(currentEvent.getHost().equals(modelMapper.map(loggedInUser, UserEntity.class))) {
-				if(eventService.delete(eventId)) {
-					return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-				} else {
-					return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-				}
+	public HttpEntity<Object> delete(@PathVariable("id") int eventId, @AuthenticationPrincipal LoggedInUser loggedInUser) {
+		EventEntity currentEvent = eventService.get(eventId).get();
+		UserEntity checkIfHost = modelMapper.map(loggedInUser, UserEntity.class);
+		if(checkIfHost.getId() != currentEvent.getHost().getId()) {
+			if(eventService.delete(eventId)) {
+				return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 			} else {
-				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 			}
+		} else {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 	}
 	
@@ -156,16 +160,16 @@ public class EventController {
 	@PutMapping("/{id}")
 	//only hiking clubs can update their own events
 	@PreAuthorize("hasRole('HIKINGCLUB')")
-	public HttpEntity<EventEntity> update(@RequestBody EventDTO eventDto, @AuthenticationPrincipal LoggedInUser loggedInUser) throws ResourceNotFoundException{
-		Optional<EventEntity> eventOptional = eventService.update(modelMapper.map(eventDto, EventEntity.class));
-		if(eventOptional.isPresent()) {
-			if(eventOptional.get().getHost() == modelMapper.map(loggedInUser, UserEntity.class)) {
+	public HttpEntity<EventEntity> update(@RequestBody EventGetDTO eventDto, @AuthenticationPrincipal LoggedInUser loggedInUser) {
+		if (loggedInUser.getId() != eventDto.getHost().getId()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		} else {
+			Optional<EventEntity> eventOptional = eventService.update(modelMapper.map(eventDto, EventEntity.class));
+			if(eventOptional.isPresent()) {
 				return ResponseEntity.ok(eventOptional.get());
 			} else {
-				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 			}
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 	}
 }

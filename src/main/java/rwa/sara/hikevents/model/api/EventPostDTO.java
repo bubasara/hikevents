@@ -8,12 +8,11 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import rwa.sara.hikevents.model.entity.UserEntity;
 
 @Data
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
 @AllArgsConstructor
-public class EventDTO {
+public class EventPostDTO {
 
 	int id;
 	@NotEmpty(message = "title cannot be null")
@@ -26,15 +25,13 @@ public class EventDTO {
 	@NotEmpty(message = "endDate cannot be null")
 	LocalDate endDate;
 	int price;
-	UserEntity host;
 	
-	public EventDTO() {
+	public EventPostDTO() {
 	}
-	public EventDTO(int id, @NotEmpty(message = "title cannot be null") String title, String description,
+	public EventPostDTO(int id, @NotEmpty(message = "title cannot be null") String title, String description,
 			@NotEmpty(message = "location cannot be null") String location,
 			@NotEmpty(message = "startDate cannot be null") LocalDate startDate,
-			@NotEmpty(message = "endDate cannot be null") LocalDate endDate, int price, UserEntity host) {
-		super();
+			@NotEmpty(message = "endDate cannot be null") LocalDate endDate, int price) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
@@ -42,7 +39,6 @@ public class EventDTO {
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.price = price;
-		this.host = host;
 	}
 	public int getId() {
 		return id;
@@ -85,12 +81,6 @@ public class EventDTO {
 	}
 	public void setPrice(int price) {
 		this.price = price;
-	}
-	public UserEntity getHost() {
-		return host;
-	}
-	public void setHost(UserEntity host) {
-		this.host = host;
 	}
 	
 }
