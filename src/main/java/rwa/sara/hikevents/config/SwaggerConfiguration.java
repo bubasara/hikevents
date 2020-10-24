@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.Lists;
 
+import rwa.sara.hikevents.security.service.LoggedInUser;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -24,13 +25,13 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-public class SwaggerConfiguration /*implements WebMvcConfigurer*/ {
+public class SwaggerConfiguration {
 
 	@Bean
 	public Docket api() {
 		return new Docket(DocumentationType.SWAGGER_2)
+				.ignoredParameterTypes(LoggedInUser.class)
 				.select()
-				//.apis(RequestHandlerSelectors.basePackage("rwa.sara.hikevents.controller"))
 				.apis(RequestHandlerSelectors.any())
 				.paths(PathSelectors.any())
 				.build()
@@ -61,12 +62,4 @@ public class SwaggerConfiguration /*implements WebMvcConfigurer*/ {
 		AuthorizationScope[] authorizationScopes = {new AuthorizationScope("global", "accessEverything")};
 		return Collections.singletonList(new SecurityReference("apiKey", authorizationScopes));
 	}
-	
-//	@Override
-//	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//		WebMvcConfigurer.super.addResourceHandlers(registry);
-//
-//		registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
-//		registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
-//	}
 }

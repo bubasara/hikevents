@@ -14,8 +14,7 @@ public interface RoleRepository extends CrudRepository<RoleEntity, Integer>, Jpa
 	
 	public List<RoleEntity> findAll();
 	public Optional<RoleEntity> findByName(String roleName);
-	public Optional<RoleEntity> deleteByName(String roleName);
-	//public Optional<List<UserEntity>> getUsers(String roleName);
+	public Optional<RoleEntity> deleteById(int roleId);
 	public boolean existsByName(String roleName);
 	
 }

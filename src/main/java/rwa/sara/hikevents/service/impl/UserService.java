@@ -5,10 +5,6 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import rwa.sara.hikevents.exception.DuplicateResourceException;
-import rwa.sara.hikevents.exception.EmailNotFoundException;
-import rwa.sara.hikevents.exception.ResourceNotFoundException;
-import rwa.sara.hikevents.exception.ResourceType;
 import rwa.sara.hikevents.model.UserType;
 import rwa.sara.hikevents.model.entity.UserEntity;
 import rwa.sara.hikevents.repository.UserRepository;
@@ -23,27 +19,26 @@ public class UserService implements IService<UserEntity>{
 		this.userRepository = userRepository;
 	}
 	
-	public Optional<UserEntity> findByName(String name){
+	public Optional<UserEntity> findByName(String name) {
 		return userRepository.findByName(name);
 	}
 	
-	public List<UserEntity> findByRole(UserType userType){
+	public List<UserEntity> findByRole(UserType userType) {
 		return userRepository.findByRole(userType);
 	}
 
 
-	public Optional<UserEntity> findByEmail(String email) throws EmailNotFoundException {
-		return Optional.of(userRepository.findByEmail(email)).orElseThrow(
-				() -> new EmailNotFoundException("User with this email not found: ", email));
+	public Optional<UserEntity> findByEmail(String email) {
+		return userRepository.findByEmail(email);
 	}
 	
 	public boolean existsByEmail(String email) {
 		return userRepository.existsByEmail(email);
 	}
 	
-	public Optional<UserEntity> insert(UserEntity userEntity) throws DuplicateResourceException {
+	public Optional<UserEntity> insert(UserEntity userEntity) {
 		if(userRepository.existsByEmail(userEntity.getEmail())) {
-			throw new DuplicateResourceException(ResourceType.USER, "User with email: " + userEntity.getEmail() + " already exists.");
+			return Optional.empty();
 		} else {
 			return Optional.of(userRepository.save(userEntity));
 		}
@@ -55,22 +50,19 @@ public class UserService implements IService<UserEntity>{
 	}
 
 	@Override
-	public Optional<UserEntity> get(int id) throws ResourceNotFoundException {
-		return Optional.of(userRepository.findById(id).orElseThrow(
-				() -> new ResourceNotFoundException(ResourceType.USER, "User with id: " + id + " not found.")));
+	public Optional<UserEntity> get(int id) {
+		return userRepository.findById(id);
 	}
 
 	@Override
-	public Optional<UserEntity> update(UserEntity userEntity) throws ResourceNotFoundException {
-		Optional.of(userRepository.findById(userEntity.getId()).orElseThrow(
-				() -> new ResourceNotFoundException(ResourceType.USER, "User with id: " + userEntity.getId() + " not found.")));
+	public Optional<UserEntity> update(UserEntity userEntity) {
 		return Optional.of(userRepository.save(userEntity));
 	}
 
 	@Override
-	public boolean delete(int id) throws ResourceNotFoundException {
+	public boolean delete(int id) {
 		if(!userRepository.existsById(id)) {
-			throw new ResourceNotFoundException(ResourceType.USER, "User with id: " + id + " not found.");
+			return false;
 		} else {
 			userRepository.deleteById(id);
 			return true;

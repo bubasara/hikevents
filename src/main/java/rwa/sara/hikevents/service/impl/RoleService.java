@@ -5,11 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import rwa.sara.hikevents.exception.DuplicateResourceException;
-import rwa.sara.hikevents.exception.ResourceNotFoundException;
-import rwa.sara.hikevents.exception.ResourceType;
 import rwa.sara.hikevents.model.entity.RoleEntity;
-import rwa.sara.hikevents.model.entity.UserEntity;
 import rwa.sara.hikevents.repository.RoleRepository;
 import rwa.sara.hikevents.service.IService;
 
@@ -26,25 +22,17 @@ public class RoleService implements IService<RoleEntity>{
 		return roleRepository.findByName(roleName);
 	}
 
-	public Optional<RoleEntity> insert(RoleEntity roleEntity) throws DuplicateResourceException {
-		if(!roleRepository.existsByName(roleEntity.getName())) {
-			throw new DuplicateResourceException(ResourceType.ROLE, "Role with id: " + roleEntity.getId() + " already exists.");
-		} else {
-			return Optional.of(roleRepository.save(roleEntity));
-		}
+	public Optional<RoleEntity> insert(RoleEntity roleEntity) {
+		return Optional.of(roleRepository.save(roleEntity));
 	}
 	
-	public boolean deleteByName(String roleName) {
+	public boolean deleteById(int roleId) {
 		try {
-			roleRepository.deleteByName(roleName);
+			roleRepository.deleteById(roleId);
 			return true;
 		} catch (Exception e) {
 			return false;
 		}
-	}
-	
-	public Optional<List<UserEntity>> getUsers(String roleName) {
-		return getUsers(roleName);
 	}
 	
 	@Override
@@ -53,22 +41,24 @@ public class RoleService implements IService<RoleEntity>{
 	}
 
 	@Override
-	public Optional<RoleEntity> get(int roleId) throws ResourceNotFoundException {
-		return Optional.of(roleRepository.findById(roleId).orElseThrow(
-				() -> new ResourceNotFoundException(ResourceType.ROLE, "Role with id: " + roleId + " not found.")));
+	public Optional<RoleEntity> get(int roleId) {
+		return roleRepository.findById(roleId);
 	}
 
 	@Override
-	public Optional<RoleEntity> update(RoleEntity roleEntity) throws ResourceNotFoundException {
-		Optional.of(roleRepository.findById(roleEntity.getId()).orElseThrow(
-				() -> new ResourceNotFoundException(ResourceType.ROLE, "Role with id: " + roleEntity.getId() + " not found.")));
-		return Optional.of(roleRepository.save(roleEntity));
+	public Optional<RoleEntity> update(RoleEntity roleEntity) {
+		if (roleRepository.findById(roleEntity.getId()).isPresent()){
+			return Optional.of(roleRepository.save(roleEntity));
+		} else {
+			return Optional.empty();
+		}
+		
 	}
 
 	@Override
-	public boolean delete(int id) throws ResourceNotFoundException {
+	public boolean delete(int id) {
 		if(!roleRepository.existsById(id)) {
-			throw new ResourceNotFoundException(ResourceType.ROLE, "Role with id: " + id + " not found.");
+			return false;
 		} else {
 			roleRepository.deleteById(id);
 			return true;

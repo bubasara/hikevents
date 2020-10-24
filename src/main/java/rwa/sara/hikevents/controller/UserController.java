@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +24,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import rwa.sara.hikevents.exception.ResourceNotFoundException;
 import rwa.sara.hikevents.model.api.UserGetDTO;
 import rwa.sara.hikevents.model.api.UserPostDTO;
 import rwa.sara.hikevents.model.entity.UserEntity;
@@ -37,11 +37,13 @@ public class UserController {
 
 	private UserService userService;
 	private ModelMapper modelMapper;
+	private PasswordEncoder encoder;
 	
 	@Autowired
-	public UserController(UserService userService, ModelMapper modelMapper) {
+	public UserController(UserService userService, ModelMapper modelMapper, PasswordEncoder encoder) {
 		this.userService = userService;
 		this.modelMapper = modelMapper;
+		this.encoder = encoder;
 	}
 	
 	@ApiOperation(value="Get all users.", response = Iterable.class)
@@ -55,7 +57,7 @@ public class UserController {
 	public HttpEntity<List<UserGetDTO>> getAll(){ //without passwords
 		List<UserGetDTO> users = new ArrayList<>();
 		for(UserEntity userEntity : userService.getAll()) {
-			users.add(modelMapper.map(userEntity, UserGetDTO.class));
+			users.add(modelMapper.map(userEntity, UserGetDTO.class));			
 		}
 		return ResponseEntity.ok(users);
 	}
@@ -68,10 +70,10 @@ public class UserController {
 			@ApiResponse(code = 404, message = "Not found - no user with that id found."),
 	})
 	@GetMapping("/{id}")
-	public HttpEntity<UserGetDTO> get(@PathVariable("id") int userId) throws ResourceNotFoundException{
+	public HttpEntity<UserGetDTO> get(@PathVariable("id") int userId) {
 		Optional<UserEntity> userOptional = userService.get(userId);
 		if(userOptional.isPresent()) {
-			return ResponseEntity.ok(modelMapper.map(userOptional, UserGetDTO.class));
+			return ResponseEntity.ok(modelMapper.map(userOptional.get(), UserGetDTO.class));
 		} else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
@@ -88,8 +90,8 @@ public class UserController {
 	@DeleteMapping("/{id}")
 	//only user itself can delete its account or an admin can ban the user
 	@PreAuthorize("hasRole('ADMIN') OR #id == #loggedInUser.id")
-	public HttpEntity<Object> delete(@PathVariable("id") int userId, @AuthenticationPrincipal LoggedInUser loggedInUser) throws ResourceNotFoundException{
-		if(userService.delete(userId)) {
+	public HttpEntity<Object> delete(@PathVariable("id") int id, @AuthenticationPrincipal LoggedInUser loggedInUser) {
+		if(userService.delete(id)) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 		} else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -107,7 +109,9 @@ public class UserController {
 	@PutMapping("/{id}")
 	//only user itself can update its info
 	@PreAuthorize("#id == #loggedInUser.id")
-	public HttpEntity<UserGetDTO> update(@RequestBody UserPostDTO userDto, @AuthenticationPrincipal LoggedInUser loggedInUser) throws ResourceNotFoundException{
+	public HttpEntity<UserGetDTO> update(@RequestBody UserPostDTO userDto, @PathVariable int id, @AuthenticationPrincipal LoggedInUser loggedInUser) {
+		userDto.setId(id);
+		userDto.setPassword(encoder.encode(userDto.getPassword()));
 		Optional<UserEntity> userOptional = userService.update(modelMapper.map(userDto, UserEntity.class));
 		if(userOptional.isPresent()) {
 			return ResponseEntity.ok(modelMapper.map(userDto, UserGetDTO.class));

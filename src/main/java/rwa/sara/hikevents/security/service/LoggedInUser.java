@@ -19,11 +19,9 @@ public class LoggedInUser implements UserDetails {
 	private int id;
 	private String name;
 	private String email;
-	//@JsonIgnore
 	private String password;
 	
 	private Collection<? extends GrantedAuthority> authorities;
-	
 	
 	public LoggedInUser(Integer id, String name, String email, String password,
 			Collection<? extends GrantedAuthority> authorities) {
@@ -46,13 +44,32 @@ public class LoggedInUser implements UserDetails {
 		return id;
 	}
 	
-	
 	public String getName() {
 		return name;
 	}
 	
 	public String getEmail() {
 		return email;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
+		this.authorities = authorities;
 	}
 
 	@Override

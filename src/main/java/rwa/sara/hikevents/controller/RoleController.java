@@ -23,11 +23,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import rwa.sara.hikevents.exception.DuplicateResourceException;
-import rwa.sara.hikevents.exception.ResourceNotFoundException;
 import rwa.sara.hikevents.model.api.RoleDTO;
 import rwa.sara.hikevents.model.entity.RoleEntity;
-import rwa.sara.hikevents.model.entity.UserEntity;
 import rwa.sara.hikevents.service.impl.RoleService;
 
 @RestController
@@ -53,7 +50,7 @@ public class RoleController {
 	})
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public HttpEntity<RoleEntity> create(@RequestBody RoleDTO roleDto) throws DuplicateResourceException{
+	public HttpEntity<RoleEntity> create(@RequestBody RoleDTO roleDto) {
 		Optional<RoleEntity> roleOptional = roleService.insert(modelMapper.map(roleDto, RoleEntity.class));
 		if(roleOptional.isPresent()) {
 			return ResponseEntity.ok(roleOptional.get());
@@ -95,11 +92,11 @@ public class RoleController {
 		if(roleOptional.isPresent()) {
 			return ResponseEntity.ok(roleOptional.get());
 		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();	//.notFound().build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 	}
 	
-	@ApiOperation(value="Delete the role with certain name", response = Iterable.class)
+	@ApiOperation(value="Delete the role with id", response = Iterable.class)
 	@ApiResponses(value= {
 			@ApiResponse(code = 200, message = "OK"),
 			@ApiResponse(code = 201, message = "Success - role deleted!"),
@@ -107,27 +104,27 @@ public class RoleController {
 			@ApiResponse(code = 403, message = "Forbidden"),
 			@ApiResponse(code = 404, message = "Not found - no role with that name found."),
 	})
-	@DeleteMapping("/{name}")
+	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public HttpEntity<Object> delete(@PathVariable("name") String roleName){
-		if(roleService.deleteByName(roleName)) {
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); //.noContent().build();
+	public HttpEntity<Object> delete(@PathVariable("id") int roleId){
+		if(roleService.deleteById(roleId)) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 		} else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 	}
 	
-	@ApiOperation(value="Update the role with cerain name.", response = Iterable.class)
+	@ApiOperation(value="Update the role with certain name.", response = Iterable.class)
 	@ApiResponses(value= {
 			@ApiResponse(code = 200, message = "OK"),
 			@ApiResponse(code = 201, message = "Success - role updated!"),
 			@ApiResponse(code = 401, message = "Not authorized - only users registered as ADMIN can update roles."),
 			@ApiResponse(code = 403, message = "Forbidden"),
-			@ApiResponse(code = 404, message = "Not found - no role with that name found."),
+			@ApiResponse(code = 404, message = "Not found - no role with that id found or has users."),
 	})
 	@PutMapping("/{name}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public HttpEntity<RoleEntity> update(@RequestBody RoleDTO roleDto) throws ResourceNotFoundException{
+	public HttpEntity<RoleEntity> update(@RequestBody RoleDTO roleDto) {
 		Optional<RoleEntity> roleOptional = roleService.update(modelMapper.map(roleDto, RoleEntity.class));
 		if(roleOptional.isPresent()) {
 			return ResponseEntity.ok(roleOptional.get());
@@ -136,22 +133,4 @@ public class RoleController {
 		}
 	}
 
-	@ApiOperation(value="Get users with certain role", response = Iterable.class)
-	@ApiResponses(value= {
-			@ApiResponse(code = 200, message = "OK"),
-			@ApiResponse(code = 201, message = "Success - users with that role returned!"),
-			@ApiResponse(code = 401, message = "Not authorized - only users registered as ADMIN can get users with certain role."),
-			@ApiResponse(code = 403, message = "Forbidden"),
-			@ApiResponse(code = 404, message = "Not found - no role with that name found."),
-	})
-	@GetMapping("/{name}/users")
-	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<List<UserEntity>> getUsers(@PathVariable("name") String roleName){
-		Optional<List<UserEntity>> registrationOptional = roleService.getUsers(roleName);
-		if (registrationOptional.isPresent()){
-			return ResponseEntity.ok(roleService.getUsers(roleName).get());
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
-	}
 }

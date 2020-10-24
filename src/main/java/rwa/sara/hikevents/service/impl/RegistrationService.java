@@ -6,8 +6,6 @@ import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import rwa.sara.hikevents.exception.ResourceNotFoundException;
-import rwa.sara.hikevents.exception.ResourceType;
 import rwa.sara.hikevents.model.entity.RegistrationEntity;
 import rwa.sara.hikevents.model.entity.UserEntity;
 import rwa.sara.hikevents.repository.RegistrationRepository;
@@ -48,22 +46,24 @@ public class RegistrationService implements IService<RegistrationEntity>{
 	}
 
 	@Override
-	public Optional<RegistrationEntity> get(int id) throws ResourceNotFoundException {
-		return Optional.of(registrationRepository.findById(id).orElseThrow(
-				() -> new ResourceNotFoundException(ResourceType.REGISTRATION, "Registration with id: " + id + " not found.")));
+	public Optional<RegistrationEntity> get(int id) {
+		return registrationRepository.findById(id);
 	}
 
 	@Override
-	public Optional<RegistrationEntity> update(RegistrationEntity registrationEntity) throws ResourceNotFoundException {
-		Optional.of(registrationRepository.findById(registrationEntity.getId()).orElseThrow(
-				() -> new ResourceNotFoundException(ResourceType.EVENT, "Registration with id: " + registrationEntity.getId() + " not found.")));
-		return Optional.of(registrationRepository.save(registrationEntity));
+	public Optional<RegistrationEntity> update(RegistrationEntity registrationEntity) {
+		if (registrationRepository.findById(registrationEntity.getId()).isPresent()) {
+			return Optional.of(registrationRepository.save(registrationEntity));
+		} else {
+			return Optional.empty();
+		}
+		
 	}
 
 	@Override
-	public boolean delete(int id) throws ResourceNotFoundException {
+	public boolean delete(int id) {
 		if(!registrationRepository.existsById(id)) {
-			throw new ResourceNotFoundException(ResourceType.REGISTRATION, "Registration with id: " + id + " not found.");
+			return false;
 		} else {
 			registrationRepository.deleteById(id);
 			return true;

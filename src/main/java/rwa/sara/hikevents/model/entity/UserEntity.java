@@ -61,8 +61,7 @@ public class UserEntity {
 	@ApiModelProperty(notes = "User's password.")
 	private String password;
 	
-	//@Column(name = "role", columnDefinition = "varchar(10)", nullable = false, unique = false)
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne
 	@ApiModelProperty(notes = "User's role.")
 	private RoleEntity role;
 	
@@ -75,7 +74,6 @@ public class UserEntity {
 	@JsonIgnore
 	@ApiModelProperty(notes = "Hiking club's events.")
 	List<RegistrationEntity> usersEvents;
-
 	
 	public UserEntity() {
 	}
