@@ -103,11 +103,12 @@ public class RoleController {
 			@ApiResponse(code = 401, message = "Not authorized - only users registered as ADMIN can delete roles."),
 			@ApiResponse(code = 403, message = "Forbidden"),
 			@ApiResponse(code = 404, message = "Not found - no role with that name found."),
+			@ApiResponse(code = 500, message = "Cannot delete role with existing users.")
 	})
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public HttpEntity<Object> delete(@PathVariable("id") int roleId){
-		if(roleService.deleteById(roleId)) {
+		if(roleService.delete(roleId)) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 		} else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

@@ -86,6 +86,7 @@ public class UserController {
 			@ApiResponse(code = 401, message = "Not authorized - only users registered as HIKER/HIKINGCLUB can delete their own accounts / ADMIN can ban users."),
 			@ApiResponse(code = 403, message = "Forbidden"),
 			@ApiResponse(code = 404, message = "Not found - no user with that id found."),
+			@ApiResponse(code = 500, message = "Cannot delete because this user is host to some events."),
 	})
 	@DeleteMapping("/{id}")
 	//only user itself can delete its account or an admin can ban the user

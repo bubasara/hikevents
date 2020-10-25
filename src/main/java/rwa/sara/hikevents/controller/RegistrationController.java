@@ -143,8 +143,9 @@ public class RegistrationController {
 	@ApiResponses(value= {
 			@ApiResponse(code = 200, message = "OK"),
 			@ApiResponse(code = 201, message = "Success - all participants for an event returned!"),
+			@ApiResponse(code = 204, message = "No content - no users registered for this event."),
 			@ApiResponse(code = 403, message = "Forbidden"),
-			@ApiResponse(code = 404, message = "Not found - desired event not found."),
+			@ApiResponse(code = 404, message = "Not found - desired event not found.")
 	})
 	@GetMapping("/participants/{eventId}")
 	public HttpEntity<List<RegistrationEntity>> getParticipants(@PathVariable("eventId") int eventId){
@@ -160,6 +161,7 @@ public class RegistrationController {
 	@ApiResponses(value= {
 			@ApiResponse(code = 200, message = "OK"),
 			@ApiResponse(code = 201, message = "Success - events which user with id registered for returned!"),
+			@ApiResponse(code = 204, message = "No content - no events this user registered for."),
 			@ApiResponse(code = 401, message = "Not authorized - only users registered as HIKER can get events which they registered for."),
 			@ApiResponse(code = 403, message = "Forbidden"),
 			@ApiResponse(code = 404, message = "Not found - no events or user found."),

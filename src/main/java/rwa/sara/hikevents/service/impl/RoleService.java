@@ -26,15 +26,6 @@ public class RoleService implements IService<RoleEntity>{
 		return Optional.of(roleRepository.save(roleEntity));
 	}
 	
-	public boolean deleteById(int roleId) {
-		try {
-			roleRepository.deleteById(roleId);
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
-	
 	@Override
 	public List<RoleEntity> getAll() {
 		return roleRepository.findAll();
