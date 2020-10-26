@@ -30,6 +30,7 @@ import rwa.sara.hikevents.model.entity.UserEntity;
 import rwa.sara.hikevents.security.service.LoggedInUser;
 import rwa.sara.hikevents.service.impl.EventService;
 import rwa.sara.hikevents.service.impl.RegistrationService;
+import rwa.sara.hikevents.service.impl.UserService;
 
 @RestController
 @RequestMapping("/registrations")
@@ -39,12 +40,15 @@ public class RegistrationController {
 	private final RegistrationService registrationService;
 	private final ModelMapper modelMapper;
 	private final EventService eventService;
+	private final UserService userService;
 	
 	@Autowired
-	public RegistrationController(RegistrationService registrationService, ModelMapper modelMapper, EventService eventServicer) {
+	public RegistrationController(RegistrationService registrationService, ModelMapper modelMapper,
+			EventService eventServicer, UserService userService) {
 		this.registrationService = registrationService;
 		this.modelMapper = modelMapper;
 		this.eventService = eventServicer;
+		this.userService = userService;
 	}
 	
 	@ApiOperation(value="Create new registration.", response = Iterable.class)
@@ -57,16 +61,21 @@ public class RegistrationController {
 	})
 	@PostMapping
 	//only hiker itself can register for an event
-	@PreAuthorize("hasRole('HIKER')")
+	//@PreAuthorize("hasRole('HIKER')")
 	public HttpEntity<RegistrationEntity> create(/*@RequestBody RegistrationDTO registrationDto,*/
 			@RequestBody int eventId, @AuthenticationPrincipal LoggedInUser loggedInUser){
 		EventEntity event = eventService.get(eventId).get();
-		UserEntity user = modelMapper.map(loggedInUser, UserEntity.class);
-		Optional<RegistrationEntity> registrationOptional = registrationService.insert(event, user);
-		if(registrationOptional.isPresent()) {
-			return ResponseEntity.ok(registrationOptional.get());
+		//UserEntity user = modelMapper.map(loggedInUser, UserEntity.class);
+		Optional<UserEntity> user = userService.get(loggedInUser.getId());
+		if(user.isPresent()) {
+			Optional<RegistrationEntity> registrationOptional = registrationService.insert(event, user.get());
+			if(registrationOptional.isPresent()) {
+				return ResponseEntity.ok(registrationOptional.get());
+			} else {
+				return ResponseEntity.status(HttpStatus.CONFLICT).build();
+			}
 		} else {
-			return ResponseEntity.status(HttpStatus.CONFLICT).build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 	}
 	
